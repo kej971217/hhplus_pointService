@@ -7,6 +7,7 @@ import io.hhplus.tdd.point.model.TransactionType;
 import io.hhplus.tdd.point.model.UserPoint;
 import io.hhplus.tdd.point.service.impl.PointServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -36,6 +37,7 @@ class PointServiceTest {
      * 충전할 수 없으며, INVALID_AMOUNT를 결과 값으로 취한다.
      */
     @Test
+    @DisplayName("유효하지 않은 값 충전 test")
     void testChargePointInvalid() {
         long userId = 3445L;
         long now = System.currentTimeMillis(); // 현재 시간 통일
@@ -56,6 +58,7 @@ class PointServiceTest {
      * 충전할 수 없으며, EXCEED를 결과 값으로 취한다.
      */
     @Test
+    @DisplayName("포인트 충전 시 최대 한도 초과 test")
     void testChargePointExceedMax() {
         long userId = 3445L;
         long now = System.currentTimeMillis(); // 현재 시간 통일
@@ -76,6 +79,7 @@ class PointServiceTest {
      * 충전할 수 있으며, SUCCESS를 결과 값으로 취한다.
      */
     @Test
+    @DisplayName("포인트 충전 성공 test")
     void testChargePointSuccess() {
         long userId = 3445L;
         long now = System.currentTimeMillis(); // 현재 시간 통일
@@ -104,6 +108,7 @@ class PointServiceTest {
      * 포인트를 사용할 수 없으며, INSUFFICIENT를 결과 값으로 취한다.
      */
     @Test
+    @DisplayName("유효하지 않은 포인트 사용 test")
     void testUsePointInvalid() {
         long userId = 3445L;
         long now = System.currentTimeMillis(); // 현재 시간 통일
@@ -122,6 +127,7 @@ class PointServiceTest {
      * 포인트를 사용할 수 없으며, INSUFFICIENT를 결과 값으로 취한다.
      */
     @Test
+    @DisplayName("사용 포인트 부족 test")
     void testUsePointInsufficient() {
         long userId = 3445L;
         long now = System.currentTimeMillis(); // 현재 시간 통일
@@ -140,6 +146,7 @@ class PointServiceTest {
      * 포인트를 사용할 수 있으며, SUCCESS를 결과 값으로 취한다.
      */
     @Test
+    @DisplayName("포인트 사용 성공 test")
     void testUsePointSuccess() {
         long userId = 3445L;
         long now = System.currentTimeMillis(); // 현재 시간 통일
@@ -165,6 +172,7 @@ class PointServiceTest {
      * 충전할 수 있으며, SUCCESS를 결과 값으로 취한다.
      */
     @Test
+    @DisplayName("포인트 충전 및 사용에 대한 동시성 test")
     void testConcurrentChargeAndUse() throws InterruptedException {
         long userId = 3445L;
         long now = System.currentTimeMillis(); // 현재 시간 통일
