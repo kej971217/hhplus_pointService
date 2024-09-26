@@ -3,6 +3,7 @@ package io.hhplus.tdd.point.service.impl;
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.model.PointHistory;
+import io.hhplus.tdd.point.model.PointValidation;
 import io.hhplus.tdd.point.model.TransactionType;
 import io.hhplus.tdd.point.model.UserPoint;
 import io.hhplus.tdd.point.service.PointService;
@@ -11,20 +12,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
 @Service("pointService")
 public class PointServiceImpl implements PointService {
-
-    private static final int MAX_POINT = 10_000_000;
-    private static final String EXCEED = "exceed";
-    private static final String SUCCESS = "success";
-    private static final String INSUFFICIENT = "insufficient";
-    private static final String INVALID_AMOUNT = "invalid_amount";
 
     @Autowired
     private UserPointTable userPointTable;
 
     @Autowired
     private PointHistoryTable pointHistoryTable;
+
 
     /**
      * 테스트 코드 작성을 위한 생성자 주입
@@ -60,18 +57,25 @@ public class PointServiceImpl implements PointService {
      */
     @Override
     public synchronized String chargePoint(long id, long amount, long now) {
-        if (amount <= 0) {
-            return INVALID_AMOUNT;
-        }
+
+        // 로깅 추가
+        System.out.println("New point: " + amount);
 
         UserPoint userPoint = userPointTable.selectById(id);
 
-        if (isExceedingMaxPoint(userPoint.point(), amount)) {
-            return EXCEED;
+        if (PointValidation.isValidAmount(amount)) {
+            return PointValidation.INVALID_AMOUNT;
         }
 
-        updatePoint(id, userPoint.point() + amount, TransactionType.CHARGE);
-        return SUCCESS;
+        if (PointValidation.isExceedingMaxPoint(userPoint.point(), amount)) {
+            return PointValidation.EXCEED;
+        }
+        long newPoint = userPoint.point() + amount;
+        updatePoint(id, newPoint, TransactionType.CHARGE);
+
+        System.out.println("New point: " + newPoint);
+
+        return PointValidation.SUCCESS;
     }
 
     /**
@@ -80,34 +84,18 @@ public class PointServiceImpl implements PointService {
      */
     @Override
     public synchronized String usePoint(long id, long amount, long now) {
-        if (amount <= 0) {
-            return INVALID_AMOUNT;
+        if (PointValidation.isValidAmount(amount)) {
+            return PointValidation.INVALID_AMOUNT;
         }
 
         UserPoint userPoint = userPointTable.selectById(id);
 
-        if (hasInsufficientPoints(userPoint, amount)) {
-            return INSUFFICIENT;
+        if (PointValidation.hasInsufficientPoints(userPoint, amount)) {
+            return PointValidation.INSUFFICIENT;
         }
 
         updatePoint(id, userPoint.point() - amount, TransactionType.USE);
-        return SUCCESS;
-    }
-
-    /**
-     * param : userPoint, amount
-     * 충전 후 포인트가 최대 포인트를 초과하는지 확인
-     */
-    private boolean isExceedingMaxPoint(long userPoint, long amount) {
-        return userPoint + amount > MAX_POINT;
-    }
-
-    /**
-     * param : userPoint, amount
-     * 사용 전 포인트가 현재 보유 포인트를 초과하는지 확인
-     */
-    private boolean hasInsufficientPoints(UserPoint userPoint, long amount) {
-        return userPoint.point() < amount;
+        return PointValidation.SUCCESS;
     }
 
     /**

@@ -5,6 +5,7 @@ import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.HandlePointException;
 import io.hhplus.tdd.point.model.PointHistory;
+import io.hhplus.tdd.point.model.PointValidation;
 import io.hhplus.tdd.point.model.TransactionType;
 import io.hhplus.tdd.point.model.UserPoint;
 import io.hhplus.tdd.point.service.PointService;
@@ -54,8 +55,11 @@ public class PointController {
             @RequestBody long amount
     ) {
         String result = pointService.chargePoint(id, amount, System.currentTimeMillis());
-        if ("exceed".equals(result)) {
+        if (PointValidation.EXCEED.equals(result)) {
             throw new HandlePointException("최대 포인트를 초과했습니다.");
+        }
+        if (PointValidation.INVALID_AMOUNT.equals(result)) {
+            throw new HandlePointException("충전 포인트를 확인하세요.");
         }
 
         UserPoint updatedUserPoint = pointService.selectPointById(id);
@@ -72,7 +76,7 @@ public class PointController {
     ) {
         String result = pointService.usePoint(id, amount, System.currentTimeMillis());
 
-        if ("insufficient".equals(result)) {
+        if (PointValidation.INSUFFICIENT.equals(result)) {
             throw new HandlePointException("잔액이 부족합니다.");
         }
 
