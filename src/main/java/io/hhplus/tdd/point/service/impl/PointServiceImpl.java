@@ -57,10 +57,6 @@ public class PointServiceImpl implements PointService {
      */
     @Override
     public synchronized String chargePoint(long id, long amount, long now) {
-
-        // 로깅 추가
-        System.out.println("New point: " + amount);
-
         UserPoint userPoint = userPointTable.selectById(id);
 
         if (PointValidation.isValidAmount(amount)) {
@@ -72,8 +68,6 @@ public class PointServiceImpl implements PointService {
         }
         long newPoint = userPoint.point() + amount;
         updatePoint(id, newPoint, TransactionType.CHARGE);
-
-        System.out.println("New point: " + newPoint);
 
         return PointValidation.SUCCESS;
     }
